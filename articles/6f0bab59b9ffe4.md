@@ -1115,3 +1115,9 @@ export const parameters = {
   }
 }
 ```
+
+# まとめ
+
+今回の構成のテンプレートリポジトリを作成しました。
+
+@[card](https://github.com/airRnot1106/nuxt-template-v3)
