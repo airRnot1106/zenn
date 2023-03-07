@@ -4,7 +4,7 @@
     "book": "zenn new:book",
     "preview": "zenn preview"
   },
-  "devDependencies": {
-    "zenn-cli": "^0.1.135"
+  "dependencies": {
+    "zenn-cli": "^0.1.141"
   }
 }
