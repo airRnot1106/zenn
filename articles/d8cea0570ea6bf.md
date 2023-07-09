@@ -3,12 +3,12 @@ title: "Node + Hono + Prisma + Jestで環境構築"
 emoji: "🔥"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["hono", "prisma", "jest"]
-published: false
+published: true
 ---
 
 ## はじめに
 
-Node.jsでHonoとPrismaを使っての開発、Jestでのテストを行う環境を整えるのに苦労したので、備忘録として残す
+Node.jsでHonoとPrismaを使っての開発およびJestでのテストを行う環境を整えるのに苦労したので、備忘録として残す
 
 ## 環境構築
 
@@ -47,7 +47,7 @@ pnpm start
 
 ### TypeScriptやLinter周りの設定
 
-これはお好みで。
+これはお好みで
 
 :::details 長いので省略
 
@@ -372,6 +372,8 @@ POSTGRES_DB=postgres
 docker compose up --build -d
 ```
 
+ここからprismaの設定
+
 ```bash
 pnpm add -D prisma
 ```
@@ -474,7 +476,7 @@ pnpm prisma:migrate
 ✔ Enter a name for the new migration: … init
 ```
 
-prismaのインスタンス作成
+prismaのインスタンスを作成
 
 ```ts:src/libs/prisma.ts
 import { PrismaClient } from '@prisma/client';
