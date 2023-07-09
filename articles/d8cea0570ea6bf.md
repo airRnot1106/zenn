@@ -10,6 +10,10 @@ published: true
 
 Node.jsでHonoとPrismaを使っての開発およびJestでのテストを行う環境を整えるのに苦労したので、備忘録として残す
 
+## リポジトリ
+
+@[card](https://github.com/airRnot1106/node-hono-prisma-jest-sample)
+
 ## 環境構築
 
 ### プロジェクト作成
