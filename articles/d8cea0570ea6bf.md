@@ -504,7 +504,7 @@ export default prisma;
 
 ```
 
-## Jest
+### Jest
 
 ```bash
 pnpm add -D jest @types/jest esbuild-jest @quramy/jest-prisma node-fetch@2
