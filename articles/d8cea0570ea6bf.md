@@ -10,7 +10,7 @@ published: true
 2023/07/12追記
 
 - `@quramy/jest-prisma`を`@quramy/jest-prisma-node`に変更
-- 「テストケースを自動生成する」の項を追加
+- 「テストケースを自動で生成する」の項を追加
 
 :::
 
