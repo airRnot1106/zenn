@@ -6,6 +6,14 @@ topics: ["hono", "prisma", "jest"]
 published: true
 ---
 
+:::message
+2023/07/12追記
+
+- `@quramy/jest-prisma`を`@quramy/jest-prisma-node`に変更
+- 「テストケースを自動生成する」の項を追加
+
+:::
+
 ## はじめに
 
 Node.jsでHonoとPrismaを使っての開発およびJestでのテストを行う環境を整えるのに苦労したので、備忘録として残す
@@ -507,7 +515,7 @@ export default prisma;
 ### Jest
 
 ```bash
-pnpm add -D jest @types/jest esbuild-jest @quramy/jest-prisma node-fetch@2
+pnpm add -D jest @types/jest esbuild-jest @quramy/jest-prisma-node node-fetch@2
 ```
 
 `tsconfig.json`に`types`を追加
@@ -531,7 +539,7 @@ pnpm add -D jest @types/jest esbuild-jest @quramy/jest-prisma node-fetch@2
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "types": ["@types/jest", "@quramy/jest-prisma"]
+    "types": ["@types/jest", "@quramy/jest-prisma-node"]
   },
   "include": ["src/**/*", "__tests__/**/*", "scripts/**/*"]
 }
@@ -548,13 +556,13 @@ module.exports = {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^~/(.*)$': '<rootDir>/$1',
   },
-  testEnvironment: '@quramy/jest-prisma/environment',
+  testEnvironment: '@quramy/jest-prisma-node/environment',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 };
 
 ```
 
-`@quramy/jest-prisma`を使うと、jest環境でprismaを使う際に、自動的にロールバックしてくれるようになる
+`@quramy/jest-prisma-node`を使うと、jest環境でprismaを使う際に、自動的にロールバックしてくれるようになる
 
 @[card](https://github.com/Quramy/jest-prisma)
 
@@ -609,7 +617,7 @@ ReferenceError: response is not defined
     "zod-prisma-types": "^2.7.4"
   },
   "devDependencies": {
-    "@quramy/jest-prisma": "^1.5.0",
+    "@quramy/jest-prisma-node": "^1.5.0",
     "@tsconfig/strictest": "^2.0.1",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.4.1",
@@ -816,6 +824,109 @@ describe('User API', () => {
 
 ちゃんと通った
 
+### テストケースを自動で生成する
+
+`@quramy/prisma-fabbrica`を使用すると、prismaのschemaからテストケースを自動生成できる
+
+@[card](https://github.com/Quramy/prisma-fabbrica)
+
+```bash
+pnpm add -D @quramy/prisma-fabbrica
+```
+
+```js:jest.config.js
+module.exports = {
+  testMatch: ['**/*.test.ts'],
+  transform: {
+    '^.+\\.ts$': 'esbuild-jest',
+  },
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^~/(.*)$': '<rootDir>/$1',
+  },
+  testEnvironment: '@quramy/jest-prisma-node/environment',
+  setupFilesAfterEnv: [
+    '@quramy/prisma-fabbrica/scripts/jest-prisma',
+    '<rootDir>/jest.setup.js',
+  ],
+};
+
+```
+
+```prisma:prisma/schema.prisma
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator zod {
+  provider                  = "pnpm dlx zod-prisma-types"
+  output                    = "../src/schema/generated/prisma"
+  createRelationValuesTypes = true
+}
+
+generator fabbrica {
+  provider = "prisma-fabbrica"
+  output   = "../fabbrica"
+  tsconfig = "../tsconfig.json"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+...
+
+```
+
+`schema.prisma`を変更した後はgenerateが必要
+
+```bash
+pnpm prisma:generate
+```
+
+`@quramy/prisma-fabbrica`を使用すると、テストを以下のように書ける
+
+```ts:__tests__/models/user.test.ts
+import prisma from '@/libs/prisma';
+import { defineUserFactory } from '~/fabbrica';
+
+describe('User', () => {
+  describe('add user', () => {
+    it('creates a new user with valid input', async () => {
+      const userFactory = defineUserFactory();
+      const user = await userFactory.create();
+
+      expect(
+        await prisma.user.findUnique({
+          where: {
+            email: user.email,
+          },
+        })
+      ).toStrictEqual(user);
+    });
+
+    it('throws an error if email is already in use', async () => {
+      const userFactory = defineUserFactory({
+        defaultData: {
+          email: 'test@example.com',
+        },
+      });
+
+      await userFactory.create();
+
+      await expect(userFactory.create()).rejects.toMatchObject({
+        name: 'PrismaClientKnownRequestError',
+      });
+    });
+  });
+});
+
+```
+
 ## まとめ
 
-`@quramy/jest-prisma`が便利すぎて神
+`@quramy/jest-prisma-node`と`@quramy/prisma-fabbrica`が便利すぎて神
